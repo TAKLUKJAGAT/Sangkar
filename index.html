@@ -1,164 +1,50 @@
-	<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Equipment Movement Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 0;
-        }
-        input, select, textarea, button {
-            width: 100%;
-            margin-bottom: 15px;
-            padding: 10px;
-            font-size: 1rem;
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>S@ngkar Equipment Form</title>
 </head>
 <body>
-    <h2>Equipment Movement Form</h2>
-    <form id="movementForm">
-        <label>Equipment:</label>
-        <input type="text" id="equipment" readonly>
+  <h1>Equipment Movement</h1>
 
-        <label>Serial Number:</label>
-        <input type="text" id="serialNumber" readonly>
+  <form id="equipmentForm">
+    <label>Equipment:</label> <span id="equipmentName"></span><br>
+    <label>Serial Number:</label> <input type="text" id="serialNumber" name="SerialNumber" readonly><br>
+    <label>Expiry Calibration:</label> <span id="expiryCal"></span><br><br>
 
-        <label>Expiry Calibration:</label>
-        <input type="text" id="expiryCalibration" readonly>
+    <label for="name">Name:</label>
+    <select id="name" name="Name"></select><br>
 
-        <label>Name:</label>
-        <select id="userName" required>
-            <option value="">Loading users...</option>
-        </select>
+    <label for="direction">Outgoing or Incoming:</label>
+    <select id="direction" name="OutgoingOrIncoming">
+      <option value="Outgoing">Outgoing</option>
+      <option value="Incoming">Incoming</option>
+    </select><br>
 
-        <label>Movement Type:</label>
-        <select id="movementType" required onchange="toggleFields()">
-            <option value="">Select Type</option>
-            <option value="Outgoing">Outgoing</option>
-            <option value="Incoming">Incoming</option>
-        </select>
+    <label for="purpose">Purpose:</label>
+    <input type="text" id="purpose" name="Purpose"><br>
 
-        <div id="toField" class="hidden">
-            <label>To:</label>
-            <input type="text" id="toLocation">
-        </div>
+    <label for="remark">Remark (max 50 chars):</label>
+    <input type="text" id="remark" name="Remark" maxlength="50"><br>
 
-        <div id="fromField" class="hidden">
-            <label>From:</label>
-            <input type="text" id="fromLocation">
-        </div>
+    <label for="qty">Qty (if consumables):</label>
+    <input type="number" id="qty" name="Qty"><br><br>
 
-        <label>Purpose:</label>
-        <input type="text" id="purpose" required>
+    <button type="submit">Submit</button>
+  </form>
 
-        <label>Remark:</label>
-        <input type="text" id="remark" maxlength="50">
+  <script>
+    // Get serial number from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const serialNumber = urlParams.get('serial');
+    document.getElementById("serialNumber").value = serialNumber;
 
-        <div id="qtyField" class="hidden">
-            <label>Quantity (if consumable):</label>
-            <input type="number" id="qty" min="1">
-        </div>
-
-        <button type="submit">Submit</button>
-    </form>
-
-    <script>
-        let equipmentData = [];
-
-        // Fetch equipment data
-        fetch('equipment_lookup.json')
-            .then(response => response.json())
-            .then(data => {
-                equipmentData = data;
-                populateFields();
-            });
-
-        // Fetch user list
-        fetch('user_list.json')
-            .then(response => response.json())
-            .then(users => {
-                const userSelect = document.getElementById('userName');
-                userSelect.innerHTML = '<option value="">Select User</option>';
-                users.forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user;
-                    option.textContent = user;
-                    userSelect.appendChild(option);
-                });
-            });
-
-        // Get Serial Number from URL and populate fields
-        function populateFields() {
-            const params = new URLSearchParams(window.location.search);
-            const serial = params.get('serial') || '';
-            document.getElementById('serialNumber').value = serial;
-
-            const equipment = equipmentData.find(item => item.Serial_Number === serial);
-if (equipment) {
-    document.getElementById('equipment').value = equipment.Equipment;
-
-    // Convert expiry to readable format
-    const expiryRaw = new Date(equipment.Expired_Calibration);
-    const options = { year: 'numeric', month: 'short', day: '2-digit' };
-    const formattedExpiry = expiryRaw.toLocaleDateString(undefined, options);
-
-    document.getElementById('expiryCalibration').value = formattedExpiry;
-} else {
-    document.getElementById('equipment').value = 'Unknown';
-    document.getElementById('expiryCalibration').value = 'Unknown';
-}
-
-        }
-
-        function toggleFields() {
-            const movementType = document.getElementById('movementType').value;
-            document.getElementById('toField').classList.toggle('hidden', movementType !== 'Outgoing');
-            document.getElementById('fromField').classList.toggle('hidden', movementType !== 'Incoming');
-        }
-
-        document.getElementById('movementForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = {
-        serialNumber: document.getElementById('serialNumber').value,
-        equipment: document.getElementById('equipment').value,
-        expiryCalibration: document.getElementById('expiryCalibration').value,
-        userName: document.getElementById('userName').value,
-        movementType: document.getElementById('movementType').value,
-        toLocation: document.getElementById('toLocation').value,
-        fromLocation: document.getElementById('fromLocation').value,
-        purpose: document.getElementById('purpose').value,
-        remark: document.getElementById('remark').value,
-        qty: document.getElementById('qty').value
-    };
-
-    fetch('https://script.google.com/macros/s/AKfycbxzuf7oyQDCzynHeOt2-yaO2aBA4x8OthiKNiWj5c9124-ETqPm8g-pnXcEPVAxTmI9sQ/exec', {
-  	method: 'POST',
-  	mode: 'no-cors', // <- This MUST be here!
-  	headers: {
-    	'Content-Type': 'application/json'
- 	 },
- 	 body: JSON.stringify(formData)
-	})
-	.then(() => {
-  alert("✅ Submission sent!");
-  window.location.reload();
-})
-.catch(error => {
-  console.error('Error:', error);
-  alert("❌ Submission may not be saved. Check Google Sheet.");
-});
-
-
-});
-
-    </script>
-</body>
-</html>
+    // Load equipment_lookup.json
+    fetch("equipment_lookup.json")
+      .then(res => res.json())
+      .then(data => {
+        if (data[serialNumber]) {
+          document.getElementById("equipmentName").textContent = data[serialNumber].Equipment;
+          document.getElementById("expiryCal").textContent = data[serialNumber].ExpiryCalibration;
+        } else {
+          document.getElementById("equipmentName").textContent = "Unknown";
