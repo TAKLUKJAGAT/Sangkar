@@ -5,7 +5,7 @@
   <title>S@ngkar Equipment Form</title>
 </head>
 <body>
-  <h1>Equipment Movement</h1>
+  <h1>S@ngkar Equipment Movement</h1>
 
   <form id="equipmentForm">
     <label>Equipment:</label> <span id="equipmentName"></span><br>
@@ -48,3 +48,49 @@
           document.getElementById("expiryCal").textContent = data[serialNumber].ExpiryCalibration;
         } else {
           document.getElementById("equipmentName").textContent = "Unknown";
+          document.getElementById("expiryCal").textContent = "Unknown";
+        }
+      });
+
+    // Load user list
+    fetch("user_list.json")
+      .then(res => res.json())
+      .then(data => {
+        const nameSelect = document.getElementById("name");
+        data.forEach(name => {
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.text = name;
+          nameSelect.appendChild(opt);
+        });
+      });
+
+    // Handle form submission
+    document.getElementById("equipmentForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append('SerialNumber', document.getElementById("serialNumber").value);
+      formData.append('Name', document.getElementById("name").value);
+      formData.append('OutgoingOrIncoming', document.getElementById("direction").value);
+      formData.append('Purpose', document.getElementById("purpose").value);
+      formData.append('Remark', document.getElementById("remark").value);
+      formData.append('Qty', document.getElementById("qty").value);
+
+      fetch('https://script.google.com/macros/s/AKfycbyjMiKrlGlkWhMfmJvKi1JCLHg9d6u-3NRAR7O-dFWeys9TfQaknxJy33F3D517Nz-M6w/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      })
+      .then(() => {
+        alert("✅ Submission sent!");
+        window.location.reload();
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("❌ Submission may not be saved. Check Google Sheet.");
+      });
+    });
+  </script>
+</body>
+</html>
