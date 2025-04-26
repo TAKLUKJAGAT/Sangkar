@@ -39,13 +39,16 @@
     const serialNumber = urlParams.get('serial');
     document.getElementById("serialNumber").value = serialNumber;
 
-    // Load equipment_lookup.json
+    // Load equipment_lookup.json (array type)
     fetch("equipment_lookup.json")
       .then(res => res.json())
       .then(data => {
-        if (data[serialNumber]) {
-          document.getElementById("equipmentName").textContent = data[serialNumber].Equipment;
-          document.getElementById("expiryCal").textContent = data[serialNumber].ExpiryCalibration;
+        const equipmentData = data.find(item => item.Serial_Number === serialNumber);
+
+        if (equipmentData) {
+          document.getElementById("equipmentName").textContent = equipmentData.Equipment;
+          const expiryDate = new Date(equipmentData.Expired_Calibration);
+          document.getElementById("expiryCal").textContent = expiryDate.toISOString().split('T')[0];
         } else {
           document.getElementById("equipmentName").textContent = "Unknown";
           document.getElementById("expiryCal").textContent = "Unknown";
@@ -77,7 +80,7 @@
       formData.append('Remark', document.getElementById("remark").value);
       formData.append('Qty', document.getElementById("qty").value);
 
-      fetch('https://script.google.com/macros/s/AKfycbyjMiKrlGlkWhMfmJvKi1JCLHg9d6u-3NRAR7O-dFWeys9TfQaknxJy33F3D517Nz-M6w/exec', {
+      fetch('https://script.google.com/macros/s/AKfycbxzuf7oyQDCzynHeOt2-yaO2aBA4x8OthiKNiWj5c9124-ETqPm8g-pnXcEPVAxTmI9sQ/exec', {
         method: 'POST',
         mode: 'no-cors',
         body: formData
