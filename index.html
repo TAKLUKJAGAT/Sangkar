@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+	<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -139,20 +139,23 @@ if (equipment) {
         qty: document.getElementById('qty').value
     };
 
-    fetch('https://script.google.com/macros/s/AKfycbxzuf7oyQDCzynHeOt2-yaO2aBA4x8OthiKNiWj5c9124-ETqPm8g-pnXcEPVAxTmI9sQ/exec', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(result => {
-        alert(result.message);
-        window.location.reload();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('❌ Submission failed. Check server.');
-    });
+    fetch('https://script.google.com/macros/s/AKfycbyjMiKrlGlkWhMfmJvKi1JCLHg9d6u-3NRAR7O-dFWeys9TfQaknxJy33F3D517Nz-M6w/exec', {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(formData)
+})
+.then(() => {
+    alert("✅ Submission sent!");
+    window.location.reload();
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert("❌ Submission may not be saved. Check Google Sheet.");
+});
+
 });
 
     </script>
